@@ -141,6 +141,7 @@ var SplatFluid = (function () {
         this.splatScale = 1.0;
         this.pointSizeScale = 1.0;
         this.lockedCovScale = 1.0;
+        this.containerScale = 1.0;
         this.positionOffset = [0, 0, 0];
 
         // Mouse tracking
@@ -218,7 +219,7 @@ var SplatFluid = (function () {
 
             // Position in grid space (base scale)
             positions[i*4]   = (f32[fBase]     - minX) * bsf + PADDING;
-            positions[i*4+1] = (f32[fBase + 1] - minY) * bsf + PADDING;
+            positions[i*4+1] = (maxY - f32[fBase + 1]) * bsf + PADDING;
             positions[i*4+2] = (f32[fBase + 2] - minZ) * bsf + PADDING;
 
             // Scale in grid units
@@ -282,6 +283,7 @@ var SplatFluid = (function () {
         // Camera
         this.camera = new Camera(this.canvas, [this.gridWidth/2, this.gridHeight/2, this.gridDepth/2]);
         this.camera.distance = Math.max(this.gridWidth, this.gridHeight, this.gridDepth) * 1.5;
+        this.baseCameraDistance = this.camera.distance;
         this.camera.setBounds(-Math.PI / 3, Math.PI / 3);
 
         // Splat program
@@ -348,6 +350,9 @@ var SplatFluid = (function () {
             else if (self.state === State.SIMULATING) self.stopSimulation();
         });
 
+        this.radiusSlider = new Slider(document.getElementById('radius-slider'),
+            this.simulator.particleRadius, 0.01, 15.0, function (v) { self.simulator.particleRadius = v; });
+
         this.flipnessSlider = new Slider(document.getElementById('fluidity-slider'),
             this.simulator.flipness, 0.5, 0.99, function (v) { self.simulator.flipness = v; });
 
@@ -356,6 +361,9 @@ var SplatFluid = (function () {
 
         this.scaleSlider = new Slider(document.getElementById('scale-slider'),
             this.splatScale, 0.1, 50.0, function (v) { self.splatScale = v; });
+
+        this.containerSlider = new Slider(document.getElementById('container-slider'),
+            this.containerScale, 0.5, 5.0, function (v) { self.setContainerScale(v); });
 
         this.pointSizeSlider = new Slider(document.getElementById('pointsize-slider'),
             this.pointSizeScale, 0.1, 5.0, function (v) { self.pointSizeScale = v; });
@@ -386,6 +394,11 @@ var SplatFluid = (function () {
             requestAnimationFrame(update);
         }).bind(this);
         update();
+    };
+
+    SplatFluid.prototype.setContainerScale = function (v) {
+        this.containerScale = v;
+        this.camera.distance = this.baseCameraDistance * v;
     };
 
     SplatFluid.prototype.onResize = function () {
@@ -525,9 +538,11 @@ var SplatFluid = (function () {
         document.getElementById('instructions-sim').style.display = 'block';
         document.getElementById('scale-row').style.display = 'none';
         document.getElementById('move-controls').style.display = 'none';
+        document.getElementById('container-row').style.display = 'none';
         this.positionOffset = [0, 0, 0];
         var simUIs = document.querySelectorAll('.simulating-ui');
         for (var i = 0; i < simUIs.length; i++) simUIs[i].style.display = 'block';
+        this.radiusSlider.redraw();
         this.flipnessSlider.redraw();
         this.speedSlider.redraw();
     };
@@ -540,6 +555,7 @@ var SplatFluid = (function () {
         document.getElementById('instructions-sim').style.display = 'none';
         document.getElementById('scale-row').style.display = 'block';
         document.getElementById('move-controls').style.display = 'block';
+        document.getElementById('container-row').style.display = 'block';
         var simUIs = document.querySelectorAll('.simulating-ui');
         for (var i = 0; i < simUIs.length; i++) simUIs[i].style.display = 'none';
     };
@@ -622,7 +638,7 @@ var SplatFluid = (function () {
                 texCoordBuffer: this.texCoordBuffer,
                 count: this.splatCount,
                 applyScale: 1.0,
-                covScale: cs
+                covScale: cs,
             });
 
         } else if (this.state === State.SIMULATING) {
@@ -637,7 +653,7 @@ var SplatFluid = (function () {
                 texCoordBuffer: this.simTexCoordBuffer,
                 count: this.simParticleCount,
                 applyScale: 0.0,
-                covScale: cs
+                covScale: cs,
             });
         }
     };

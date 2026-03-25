@@ -14,10 +14,11 @@ varying vec3 v_position;
 varying vec3 v_velocity;
 
 uniform float u_zOffset; //the offset for the z layer we're splatting into
+uniform float u_particleRadius;
 varying float v_zIndex; //the z layer we're splatting into
 
 void main () {
-    gl_PointSize = 5.0; //TODO: i can probably compute this more accurately
+    gl_PointSize = u_particleRadius;
 
     vec3 position = texture2D(u_positionTexture, a_textureCoordinates).rgb;
     position = (position / u_gridSize) * u_gridResolution;

@@ -42,6 +42,7 @@ var Simulator = (function () {
         this.gridResolutionZ = 0;
 
         this.particleDensity = 0;
+        this.particleRadius = 2.0;
 
         this.velocityTextureWidth = 0;
         this.velocityTextureHeight = 0;
@@ -310,6 +311,7 @@ var Simulator = (function () {
             .uniform3f('u_gridSize', this.gridWidth, this.gridHeight, this.gridDepth)
             .uniformTexture('u_positionTexture', 0, wgl.TEXTURE_2D, this.particlePositionTexture)
             .uniformTexture('u_velocityTexture', 1, wgl.TEXTURE_2D, this.particleVelocityTexture)
+            .uniform1f('u_particleRadius', this.particleRadius)
 
             .enable(wgl.BLEND)
             .blendEquation(wgl.FUNC_ADD)

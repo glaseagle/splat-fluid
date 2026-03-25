@@ -1,49 +1,59 @@
 # Splat Fluid
 
-**3D Gaussian Splats dissolve into real-time fluid simulation.**
+**3D Gaussian Splats meet real-time fluid simulation.**
 
-Load any `.splat` file, preview it with a proper 3D Gaussian Splatting renderer, then hit Start and watch the gaussians become fluid particles governed by a GPU-based FLIP solver. Each particle keeps its original color and gaussian shape as it flows, splashes, and settles.
+https://github.com/user-attachments/assets/placeholder
+
+Load a Gaussian Splat, position and scale it inside a fluid container, then hit **Start** and watch it dissolve into a real-time FLIP fluid simulation. Every particle keeps its original color and gaussian shape as it flows, splashes, and pools.
 
 ## How It Works
 
-1. **Load** a `.splat` file — positions, rotations, scales, and colors are parsed and packed into GPU textures
-2. **Preview** the splat with full 3D Gaussian Splatting: covariance matrices are projected to screen space via the Jacobian of perspective projection, rendered as instanced quads with proper gaussian evaluation in the fragment shader
-3. **Simulate** — press Start and only the in-bounds gaussians become FLIP fluid particles. The GPU solver handles velocity transfer, pressure projection, and advection while the renderer draws each particle as its original gaussian
+A `.splat` file is parsed into positions, colors, rotations, and scales. The 3D covariance matrix for each gaussian is computed from its quaternion rotation and anisotropic scale, then packed into GPU textures. In preview mode, instanced quads render each gaussian with proper screen-space covariance projection. When you press Start, the visible gaussians become particles in a GPU FLIP/PIC fluid solver — the simulation runs entirely on the GPU while the renderer draws each particle as its original colored gaussian.
 
 ## Controls
 
-- **Drag** to orbit the camera
-- **Scroll** to zoom
-- **Splat Scale** — resize the splat within the fluid container (up to 50x)
-- **Position X/Y/Z** — shift the splat inside the container before starting
-- **Point Size** — scale the visual size of each gaussian
-- **Start** — begin fluid simulation
-- **Fluidity** — PIC/FLIP blend (higher = more fluid, less viscous)
-- **Speed** — simulation timestep
-- **Move mouse** — push particles around during simulation
+| Control | What it does |
+|---|---|
+| **Drag** | Orbit camera |
+| **Scroll** | Zoom |
+| **Splat Scale** | Resize the splat (up to 50x) |
+| **Position X/Y/Z** | Shift the splat inside the container |
+| **Zoom** | Camera orbit distance |
+| **Point Size** | Visual size of each gaussian |
+| **Start** | Begin fluid simulation |
+| **Particle Radius** | Fluid collision radius (smaller = less viscous) |
+| **Fluidity** | PIC/FLIP blend ratio |
+| **Speed** | Simulation timestep |
+| **Mouse movement** | Push particles during simulation |
 
 ## Running Locally
 
 ```bash
-# Clone the repo
 git clone https://github.com/glaseagle/splat-fluid.git
 cd splat-fluid
-
-# Drop a .splat file in the root directory
-# (default expects rainbow-cars.splat — edit splatfluid.js line 163 to change)
-
-# Serve it
 python -m http.server 8080
-
 # Open http://localhost:8080/splat-fluid.html
 ```
 
-> `.splat` files are not included in the repo due to size. You can export them from [SuperSplat](https://playcanvas.com/supersplat/editor), [Luma AI](https://lumalabs.ai/), or convert from `.ply` using standard 3DGS tools.
+The Rainbow Cars splat is included in the repo. To use a different splat, drop a `.splat` file in the root directory and update the fetch URL in `splatfluid.js`.
 
-## Tech
+## Using Your Own Splats
 
-- **Rendering**: Instanced quad 3D Gaussian Splatting in WebGL 1 (ANGLE_instanced_arrays)
-- **Simulation**: GPU FLIP/PIC fluid solver ([dli/fluid](https://github.com/dli/fluid))
-- **Format**: Standard `.splat` binary (32 bytes/vertex: 3xF32 pos, 3xF32 scale, 4xU8 RGBA, 4xU8 quaternion)
+The loader expects the standard `.splat` binary format (32 bytes per vertex):
+
+| Bytes | Type | Content |
+|---|---|---|
+| 0–11 | 3x float32 | Position (x, y, z) |
+| 12–23 | 3x float32 | Scale (sx, sy, sz) |
+| 24–27 | 4x uint8 | Color (r, g, b, a) |
+| 28–31 | 4x uint8 | Rotation quaternion (w, x, y, z) |
+
+Export from [SuperSplat](https://playcanvas.com/supersplat/editor), [Luma AI](https://lumalabs.ai/), [Polycam](https://poly.cam/), or convert from `.ply` with standard 3DGS tools.
+
+## Tech Stack
+
+- **Rendering** — Instanced quad 3D Gaussian Splatting in WebGL 1 (ANGLE_instanced_arrays, covariance projection via Jacobian)
+- **Simulation** — GPU FLIP/PIC fluid solver ([dli/fluid](https://github.com/dli/fluid))
+- **No dependencies** — Pure WebGL, no libraries
 
 Built on top of [David Li's fluid simulation](https://github.com/dli/fluid).
