@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Splat → Fluid</title>
+        <link href='https://fonts.googleapis.com/css?family=Asap:400,700' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="flip.css"/>
+        <style>
+            #loading {
+                position: absolute;
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                color: #999;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            #particle-info {
+                color: #777;
+                font-size: 12px;
+                margin-top: 4px;
+            }
+            .simulating-ui { display: none; }
+            .move-row {
+                display: flex;
+                align-items: center;
+                margin-top: 5px;
+                gap: 4px;
+            }
+            .move-row .slider-label {
+                margin-top: 0;
+                width: 20px;
+                text-align: center;
+            }
+            .move-btn {
+                width: 28px;
+                height: 22px;
+                background: rgba(0,0,0,0.1);
+                border: none;
+                font-size: 14px;
+                font-weight: bold;
+                color: #555;
+                cursor: pointer;
+                pointer-events: auto;
+                font-family: 'Asap', Helvetica, Arial, sans-serif;
+            }
+            .move-btn:hover { background: rgba(0,0,0,0.18); }
+            .move-btn:active { background: rgba(0,0,0,0.25); }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="canvas" width="1920" height="1080"></canvas>
+
+        <div id="loading">Loading bonsai splat...</div>
+
+        <div id="ui" style="display:none;">
+            <div id="start-button" class="start-button-active">Start</div>
+            <div id="particle-info"></div>
+
+            <div id="scale-row">
+                <div class="slider-label">Splat Scale</div>
+                <div id="scale-slider" class="slider"></div>
+            </div>
+
+            <div id="move-controls">
+                <div class="slider-label">Position</div>
+                <div class="move-row"><div class="slider-label">X</div><button class="move-btn" data-axis="x" data-dir="-1">&minus;</button><button class="move-btn" data-axis="x" data-dir="1">+</button></div>
+                <div class="move-row"><div class="slider-label">Y</div><button class="move-btn" data-axis="y" data-dir="-1">&minus;</button><button class="move-btn" data-axis="y" data-dir="1">+</button></div>
+                <div class="move-row"><div class="slider-label">Z</div><button class="move-btn" data-axis="z" data-dir="-1">&minus;</button><button class="move-btn" data-axis="z" data-dir="1">+</button></div>
+            </div>
+
+            <div class="slider-label">Point Size</div>
+            <div id="pointsize-slider" class="slider"></div>
+
+            <div class="slider-label simulating-ui">Fluidity</div>
+            <div id="fluidity-slider" class="slider simulating-ui"></div>
+
+            <div class="slider-label simulating-ui">Speed</div>
+            <div id="speed-slider" class="slider simulating-ui"></div>
+        </div>
+
+        <div class="instructions" id="instructions-preview">
+            <span>Drag</span> to rotate camera<br/>
+            <span>Scroll</span> to zoom in and out<br/>
+            <span>Click Start</span> to simulate fluid
+        </div>
+
+        <div class="instructions" id="instructions-sim" style="display:none;">
+            <span>Drag</span> to rotate camera<br/>
+            <span>Scroll</span> to zoom in and out<br/>
+            <span>Move mouse</span> to push particles
+        </div>
+
+        <script src="wrappedgl.js"></script>
+        <script src="utilities.js"></script>
+        <script src="camera.js"></script>
+        <script src="simulator.js"></script>
+        <script src="slider.js"></script>
+        <script src="splatfluid.js"></script>
+
+        <script>
+            WrappedGL.checkWebGLSupportWithExtensions(
+                ['ANGLE_instanced_arrays', 'WEBGL_depth_texture', 'OES_texture_float', 'OES_texture_float_linear', 'OES_texture_half_float', 'OES_texture_half_float_linear'],
+                function () {
+                    new SplatFluid();
+                },
+                function (hasWebGL, unsupportedExtensions) {
+                    document.getElementById('loading').textContent = hasWebGL
+                        ? 'Missing WebGL extensions: ' + unsupportedExtensions.join(', ')
+                        : 'WebGL not supported';
+                }
+            );
+        </script>
+    </body>
+</html>
