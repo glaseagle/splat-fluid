@@ -2,7 +2,7 @@
 
 **3D Gaussian Splats meet real-time fluid simulation.**
 
-https://github.com/user-attachments/assets/placeholder
+**[Live Demo](https://glaseagle.github.io/splat-fluid/)**
 
 Load a Gaussian Splat, position and scale it inside a fluid container, then hit **Start** and watch it dissolve into a real-time FLIP fluid simulation. Every particle keeps its original color and gaussian shape as it flows, splashes, and pools.
 
