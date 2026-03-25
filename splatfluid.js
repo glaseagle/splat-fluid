@@ -162,7 +162,7 @@ var SplatFluid = (function () {
         var self = this;
         var loadingEl = document.getElementById('loading');
 
-        fetch('bonsai.splat').then(function (r) {
+        fetch('rainbow-cars.splat').then(function (r) {
             loadingEl.textContent = 'Parsing splat data...';
             return r.arrayBuffer();
         }).then(function (buffer) {
